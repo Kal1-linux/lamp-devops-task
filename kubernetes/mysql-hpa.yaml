@@ -1,0 +1,26 @@
+# NOTE: horizontally scaling a single-primary MySQL StatefulSet does not
+# create read replicas or shard data automatically — scaling replicas here
+# only adds more independent MySQL instances with their own PVCs, which is
+# not meaningful for a single-primary database. This HPA is included to
+# satisfy the "both services" requirement; in a real deployment, MySQL
+# read-scaling would instead use a proper replication topology
+# (e.g. Percona XtraDB Cluster or a managed RDS read replica) rather than HPA.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata:
+  name: mysql-hpa
+  namespace: lamp
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: mysql
+  minReplicas: 1
+  maxReplicas: 3
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 75

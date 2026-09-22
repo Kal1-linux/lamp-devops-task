@@ -1,0 +1,28 @@
+# Security & Secrets
+AWS_keys.md
+*.pem
+*.key
+*.id_rsa
+.env
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Ansible
+*.retry
+.ansible/
+
+# Operating System & Editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
+*~

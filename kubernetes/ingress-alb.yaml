@@ -1,0 +1,30 @@
+# ---------------------------------------------------------------------------
+# Production AWS ALB / Nginx Ingress Controller with Route53 DNS & SSL
+# ---------------------------------------------------------------------------
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: lamp-frontend-ingress
+  namespace: lamp
+  annotations:
+    # AWS Load Balancer Controller (ALB) Configuration
+    kubernetes.io/ingress.class: alb
+    alb.ingress.kubernetes.io/scheme: internet-facing
+    alb.ingress.kubernetes.io/target-type: ip
+    alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
+    alb.ingress.kubernetes.io/ssl-redirect: '443'
+    # External-DNS integration for automatic Route53 record creation
+    external-dns.alpha.kubernetes.io/hostname: app.yourdomain.com
+spec:
+  rules:
+    - host: app.yourdomain.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 80

@@ -1,0 +1,17 @@
+# Standalone PVC, provided as a deliverable per the task requirements.
+# NOTE: the StatefulSet below (mysql-statefulset.yaml) instead uses a
+# volumeClaimTemplate to provision a PVC per replica automatically, which is
+# the recommended pattern for StatefulSets. Use this file only if you deploy
+# MySQL as a plain Deployment instead of a StatefulSet.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+  namespace: lamp
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 2Gi

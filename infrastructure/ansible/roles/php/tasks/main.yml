@@ -1,0 +1,14 @@
+---
+- name: Install PHP-FPM packages
+  apt:
+    name:
+      - "php{{ php_version }}-fpm"
+      - "php{{ php_version }}-mysql"
+      - "php{{ php_version }}-cli"
+    state: present
+
+- name: Ensure PHP-FPM is started and enabled
+  service:
+    name: "php{{ php_version }}-fpm"
+    state: started
+    enabled: true

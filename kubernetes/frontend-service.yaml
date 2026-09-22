@@ -1,0 +1,19 @@
+# Use type: LoadBalancer on a cloud provider (EKS/GKE/AKS) to get a public IP.
+# On Minikube/kind/k3s without a cloud load balancer, LoadBalancer stays
+# "pending" — switch type to NodePort (kept below, commented) or run
+# `minikube service frontend -n lamp` to access it.
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend
+  namespace: lamp
+  labels:
+    app: frontend
+spec:
+  type: LoadBalancer
+  selector:
+    app: frontend
+  ports:
+    - port: 80
+      targetPort: 80
+      # nodePort: 30080   # uncomment and set type: NodePort for local clusters

@@ -1,0 +1,12 @@
+# Example Terraform Variables for Multi-DevOps Team Collaboration
+# Copy this file to `terraform.tfvars` and set your local environment values.
+# NEVER commit `terraform.tfvars` to Git!
+
+aws_region        = "us-east-1"
+instance_type     = "t2.micro"
+key_name          = "your-ec2-key-pair-name"
+ssh_cidr          = "YOUR.LOCAL.IP.ADDRESS/32" # Restrict SSH to your IP
+vpc_cidr          = "10.0.0.0/16"
+public_subnet_cidr = "10.0.1.0/24"
+db_name           = "appdb"
+db_user           = "appuser"

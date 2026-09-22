@@ -1,0 +1,121 @@
+---
+- name: Deploy LAMP stack (Nginx + PHP-FPM + MySQL) on EC2
+  hosts: webserver
+  become: true
+  vars:
+    php_version: "8.1"
+    db_name: appdb
+    db_user: appuser
+    db_password: "apppassword"          # override with -e / ansible-vault in real use
+    mysql_root_password: "rootpassword" # override with -e / ansible-vault in real use
+    app_root: /var/www/html
+
+  tasks:
+    # --- System prep --------------------------------------------------
+    - name: Update apt cache
+      apt:
+        update_cache: true
+        cache_valid_time: 3600
+
+    - name: Install base packages
+      apt:
+        name:
+          - nginx
+          - mysql-server
+          - "php{{ php_version }}-fpm"
+          - "php{{ php_version }}-mysql"
+          - "php{{ php_version }}-cli"
+          - python3-pymysql
+        state: present
+
+    # --- MySQL ----------------------------------------------------------
+    - name: Ensure MySQL is running and enabled on boot
+      service:
+        name: mysql
+        state: started
+        enabled: true
+
+    - name: Set MySQL root password
+      community.mysql.mysql_user:
+        name: root
+        host: localhost
+        password: "{{ mysql_root_password }}"
+        login_unix_socket: /var/run/mysqld/mysqld.sock
+        check_implicit_admin: true
+      ignore_errors: true   # no-op if root password already set on a re-run
+
+    - name: Create application database
+      community.mysql.mysql_db:
+        name: "{{ db_name }}"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    - name: Create application MySQL user
+      community.mysql.mysql_user:
+        name: "{{ db_user }}"
+        password: "{{ db_password }}"
+        priv: "{{ db_name }}.*:ALL"
+        host: "localhost"
+        state: present
+        login_user: root
+        login_password: "{{ mysql_root_password }}"
+
+    # --- PHP-FPM ----------------------------------------------------------
+    - name: Ensure PHP-FPM is running and enabled on boot
+      service:
+        name: "php{{ php_version }}-fpm"
+        state: started
+        enabled: true
+
+    # --- Nginx --------------------------------------------------------
+    - name: Deploy Nginx site config from template
+      template:
+        src: templates/nginx.conf.j2
+        dest: /etc/nginx/sites-available/lamp-app
+        owner: root
+        group: root
+        mode: "0644"
+      notify: Reload nginx
+
+    - name: Enable the site (symlink into sites-enabled)
+      file:
+        src: /etc/nginx/sites-available/lamp-app
+        dest: /etc/nginx/sites-enabled/lamp-app
+        state: link
+      notify: Reload nginx
+
+    - name: Remove default Nginx site
+      file:
+        path: /etc/nginx/sites-enabled/default
+        state: absent
+      notify: Reload nginx
+
+    - name: Ensure Nginx is running and enabled on boot
+      service:
+        name: nginx
+        state: started
+        enabled: true
+
+    # --- Application ----------------------------------------------------
+    - name: Ensure web root exists
+      file:
+        path: "{{ app_root }}"
+        state: directory
+        owner: www-data
+        group: www-data
+        mode: "0755"
+
+    - name: Deploy index.php from template
+      template:
+        src: templates/index.php.j2
+        dest: "{{ app_root }}/index.php"
+        owner: www-data
+        group: www-data
+        mode: "0644"
+
+  handlers:
+    - name: Reload nginx
+      service:
+        name: nginx
+        state: reloaded

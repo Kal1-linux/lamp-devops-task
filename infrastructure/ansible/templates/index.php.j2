@@ -1,0 +1,19 @@
+<?php
+$dbHost = 'localhost';
+$dbUser = '{{ db_user }}';
+$dbPass = '{{ db_password }}';
+$dbName = '{{ db_name }}';
+
+$mysqli = @new mysqli($dbHost, $dbUser, $dbPass, $dbName);
+
+header('Content-Type: text/html; charset=utf-8');
+echo "<!DOCTYPE html><html><head><title>LAMP on EC2</title></head><body>";
+echo "<h1>LAMP Stack on EC2 (Terraform + Ansible)</h1>";
+
+if ($mysqli->connect_errno) {
+    echo "<p style='color:red;'>Could not connect to MySQL: " . htmlspecialchars($mysqli->connect_error) . "</p>";
+} else {
+    echo "<p>Hello, World! Your MySQL connection is successful.</p>";
+    $mysqli->close();
+}
+echo "</body></html>";

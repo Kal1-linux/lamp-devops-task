@@ -1,0 +1,23 @@
+# Restricts MySQL pods so only the front-end pods (label app=frontend) can
+# reach port 3306. The mysql Service is also ClusterIP/headless already, so
+# it has no external IP, but this NetworkPolicy adds defense-in-depth at the
+# pod-network level (requires a CNI that enforces NetworkPolicy, e.g. Calico).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: mysql-allow-frontend-only
+  namespace: lamp
+spec:
+  podSelector:
+    matchLabels:
+      app: mysql
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: frontend
+      ports:
+        - protocol: TCP
+          port: 3306

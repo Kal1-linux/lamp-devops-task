@@ -1,0 +1,18 @@
+# Static PV for local/dev clusters (Minikube, kind, k3s using hostPath).
+# On a cloud provider you would normally rely on a StorageClass with dynamic
+# provisioning instead and drop this file, letting the StatefulSet's
+# volumeClaimTemplate create the PV automatically.
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: mysql-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 2Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/data/mysql"

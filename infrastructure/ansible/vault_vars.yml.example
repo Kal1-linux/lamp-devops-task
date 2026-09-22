@@ -1,0 +1,11 @@
+# Example Encrypted Vault Variables
+#
+# Encrypt this file using:
+#   ansible-vault encrypt vault_vars.yml
+# Run playbook passing the vault password:
+#   ansible-playbook -i inventory.ini playbook.yml --ask-vault-pass -e @vault_vars.yml
+
+db_name: appdb
+db_user: appuser
+db_password: "SuperSecretSecureDbPassword123!"
+mysql_root_password: "SuperSecretSecureRootPassword123!"

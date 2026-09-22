@@ -1,0 +1,57 @@
+name: Enterprise CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+# Grant OIDC token permissions for passwordless AWS authentication
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  validate-and-lint:
+    name: Validate Manifests & IaC
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS OIDC Credentials (Passwordless / Keyless)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::049341091660:role/GitHubActionsOIDCRole
+          aws-region: us-east-1
+        continue-on-error: true
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.6
+
+      - name: Validate Infrastructure Terraform
+        run: |
+          cd infrastructure/terraform
+          terraform init -backend=false
+          terraform validate
+
+      - name: Validate EKS Terraform Module
+        run: |
+          cd kubernetes/terraform-eks
+          terraform init -backend=false
+          terraform validate
+
+      - name: Install Ansible
+        run: pip install ansible
+
+      - name: Validate Ansible Playbook Syntax
+        run: |
+          cd infrastructure/ansible
+          ansible-playbook --syntax-check playbook.yml
+
+      - name: Build Application Docker Image
+        run: |
+          cd app
+          docker build -t lamp-web:ci .

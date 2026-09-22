@@ -1,0 +1,8 @@
+# Development Environment Terraform Variables
+aws_region        = "us-east-1"
+environment       = "dev"
+instance_type     = "t2.micro"
+key_name          = "dev-key"
+ssh_cidr          = "10.0.0.0/8"
+vpc_cidr          = "10.1.0.0/16"
+public_subnet_cidr = "10.1.1.0/24"

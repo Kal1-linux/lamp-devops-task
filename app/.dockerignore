@@ -1,0 +1,10 @@
+.git
+.gitignore
+.env
+*.md
+AWS_keys.md
+Dockerfile
+docker-compose.yml
+.idea
+.vscode
+*.swp
